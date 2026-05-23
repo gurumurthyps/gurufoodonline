@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from .forms import UserForm
 from .models import User, UserProfile
+from vendor.models import Vendor
 from django.contrib import messages,auth
 from vendor.forms import VendorForm
 from .utils import detectUser,send_verification_email
@@ -124,7 +125,11 @@ def custDashboard(request):
 @login_required(login_url='login')
 @user_passes_test(check_role_rest)
 def restDashboard(request):
-    return render(request, 'accounts/restDashboard.html')
+    vendor = Vendor.objects.get(user=request.user)
+    context = {
+        'vendor':vendor
+    }
+    return render(request, 'accounts/restDashboard.html',context)
 
 def activate(request,uidb64,token):
     try:
