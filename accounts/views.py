@@ -4,7 +4,7 @@ from .forms import UserForm
 from .models import User, UserProfile
 from django.contrib import messages,auth
 from vendor.forms import VendorForm
-from .utils import detectUser
+from .utils import detectUser,send_verification_email
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.core.exceptions import PermissionDenied
 
@@ -37,6 +37,7 @@ def registerUser(request):
             user.role=User.CUSTOMER
             user.set_password(password)
             user.save()
+            send_verification_email(request,user)
             messages.success(request, "your registsration has been successfully done")
             return redirect('registerUser')
         else:
@@ -67,6 +68,7 @@ def registerVendor(request):
             user_profile=UserProfile.objects.get(user=user)
             vendor.user_profile = user_profile
             vendor.save()
+            send_verification_email(request,user)
             messages.success(request,"Your Restuarant is successfully registered")
             return redirect('registerVendor')
         else:
@@ -123,3 +125,18 @@ def custDashboard(request):
 @user_passes_test(check_role_rest)
 def restDashboard(request):
     return render(request, 'accounts/restDashboard.html')
+
+def activate(request,uidb64,token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User._default_manager.get(pk =uid)
+    except:
+        user=None    
+    if user is not None and default_token_generator.check_token(user,token):
+        user.is_active = True
+        user.save()
+        messages.success(request, "user is now active")    
+        return redirect('myAccount')
+    else:
+        messages.error(request,"User is not active")
+        return redirect('login')
