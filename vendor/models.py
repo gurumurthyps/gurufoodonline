@@ -13,3 +13,13 @@ class Vendor(models.Model):
     
     def __str__(self):
         return self.vendor_name
+    
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            orig = Vendor.objects.get(pk = self.pk)
+            if orig.is_approved != self.is_approved:
+                if self.is_approved==True:
+                    pass
+                else:
+                    pass  
+        return super(Vendor, self).save(* args, **kwargs)
