@@ -126,10 +126,7 @@ def custDashboard(request):
 @user_passes_test(check_role_rest)
 def restDashboard(request):
     vendor = Vendor.objects.get(user=request.user)
-    context = {
-        'vendor':vendor
-    }
-    return render(request, 'accounts/restDashboard.html',context)
+    return render(request, 'accounts/restDashboard.html')
 
 def activate(request,uidb64,token):
     try:
